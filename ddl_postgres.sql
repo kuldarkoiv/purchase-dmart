@@ -4,8 +4,21 @@
 -- Allikas: MSSQL woodpecker_dev (ETL via etl.py)
 -- =============================================================================
 
+-- Katkesta idle ühendused (vabastan lukud mis jäid eelmistest katsetest)
+SELECT pg_terminate_backend(pid)
+FROM pg_stat_activity
+WHERE datname = current_database()
+  AND pid <> pg_backend_pid()
+  AND state = 'idle'
+  AND query_start < NOW() - INTERVAL '1 minute';
+
+-- Lock timeout - kui 15 sekundiga ei saa lukku, anna viga (ära jää ootama)
+SET lock_timeout = '15s';
+
 -- Schema
 CREATE SCHEMA IF NOT EXISTS purchase_dmart;
+
+GRANT USAGE ON SCHEMA purchase_dmart TO doadmin;
 
 -- =============================================================================
 -- TABEL 1: purchase_order_lines
@@ -13,7 +26,7 @@ CREATE SCHEMA IF NOT EXISTS purchase_dmart;
 -- Üks rida = üks tarneliin (contract_delivery, purchase lepingust).
 -- =============================================================================
 
-DROP TABLE IF EXISTS purchase_dmart.purchase_order_lines;
+DROP TABLE IF EXISTS purchase_dmart.purchase_order_lines CASCADE;
 
 CREATE TABLE purchase_dmart.purchase_order_lines (
 
@@ -74,7 +87,7 @@ CREATE TABLE purchase_dmart.purchase_order_lines (
     pending_meters              NUMERIC(12,3),
     balance_packs               INT,
     balance_meters              NUMERIC(12,3),
-    fulfillment_pct             NUMERIC(5,1),   -- täitmise %
+    fulfillment_pct             NUMERIC(10,1),  -- täitmise %
 
     -- Tähtaegsus
     snapshot_date               TIMESTAMP,
@@ -116,7 +129,7 @@ GRANT SELECT ON purchase_dmart.purchase_order_lines TO doadmin;
 -- Üks rida = üks pakk (product) mis on seotud ostutellimuse reaga.
 -- =============================================================================
 
-DROP TABLE IF EXISTS purchase_dmart.purchase_material_products;
+DROP TABLE IF EXISTS purchase_dmart.purchase_material_products CASCADE;
 
 CREATE TABLE purchase_dmart.purchase_material_products (
 
@@ -132,6 +145,7 @@ CREATE TABLE purchase_dmart.purchase_material_products (
     order_line_id               INT,            -- FK -> purchase_order_lines.order_line_id
     order_line_number           INT,
     order_due_date              DATE,           -- koopeeritud paremaks pärimiseks
+    order_due_seller            DATE,
     order_mark                  TEXT,
     order_line_comment          TEXT,           -- planeerija kommentaar ostutellimuse real
 

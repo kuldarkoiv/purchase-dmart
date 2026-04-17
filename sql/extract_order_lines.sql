@@ -85,7 +85,7 @@ SELECT
     -- -------------------------------------------------------------------------
     CASE
         WHEN cd.meters > 0
-        THEN ROUND(100.0 * ISNULL(cdf.meters_done, 0) / cd.meters, 1)
+        THEN ROUND(CAST(100.0 * ISNULL(cdf.meters_done, 0) / cd.meters AS DECIMAL(8,1)), 1)
         ELSE NULL
     END                                 AS fulfillment_pct,
 
