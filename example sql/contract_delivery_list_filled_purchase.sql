@@ -1,0 +1,33 @@
+SELECT        cd.id, cd.volume, cd.volume2, cd.volume3, cd.volume_max, cd.due, cd.packs, cd.ppp, cd.buyers_ref, cd.mark, cd.delivery_number, cd.pieces, cd.bundle_size, cd.meters, cd.meters_max, cd.packaging_id, cd.packaging, 
+                         cd.packaging_spec, cd.square_meters, cd.profile_id, cd.profile_group_id, cd.treatment_paint_id, cd.treatment_paint_group_id, cd.treatment_shape_id, cd.treatment_impregnation_id, cd.quantity, cd.quantity_max, cd.price, 
+                         cd.currency_id, cd.unit, cd.rate, cd.meter_price, cd.total, cd.total_norm, cd.price_m3, cd.margin_anticipated_percentage, cd.margin_anticipated, cd.margin_anticipated_norm, cd.marking_comments, 
+                         cd.marking_comments_production, cd.finished, cd.critical, cd.currently_loading, cd.contract_goods_id, cd.contract_id, cd.number_full, cd.number_full_delivery, cd.contract_number, cd.row_number, cd.species_id, cd.species, 
+                         cd.cert_id, cd.cert, cd.pefc_percent, cd.height, cd.width, cd.length_min, cd.length, cd.height2, cd.width2, cd.height3, cd.width3, cd.height2_fixed, cd.width2_fixed, cd.height3_fixed, cd.width3_fixed, cd.contract_type_id, 
+                         cd.sentdate, cd.export_id, cd.archived, cd.grade_id, cd.grade, cd.treatment_id, cd.treatment, cd.trader_id, cd.order_number, cd.goods, cd.goods_sizes2, cd.goods_sizes3, cd.article_base, cd.article_der, cd.article_group_id, 
+                         cd.article_group, cd.treatment_refinement, cd.treatment_other, cd.comment, cd.other_comment, cd.row_comment, cd.delivery_comment, cd.header_comment, cd.destination_id, cd.destination, cd.account_id_port, cd.port, 
+                         cd.country_id, cd.customer_id, cd.customer, cd.supplier_id, cd.supplier, cd.producer_id, cd.producer, cd.account_other, cd.agent_id, cd.agent, cd.direction, cd.agency, cd.sales, cd.purchase, cd.internal, cd.status_id, 
+                         cd.volume_coef, cd.volume2_coef, cd.volume3_coef, cd.article_id, cd.article_base_id, cd.article_type_id, cd.total_days, cd.elapsed_days, cd.week, cd.material_spec, cd.quality, cd.tolerances, cd.production_date, 
+                         cd.notification_time, COALESCE (cd.length_min, cd.length) AS length_min2, cd.packs - ISNULL(cdf.packs_done, 0) AS packs_needed, cd.packs - ISNULL(cdf.packs_shipped, 0) AS packs_balance, ISNULL(cdf.packs_done, 0) 
+                         AS packs_done, ISNULL(cdf.packs_stock, 0) AS packs_stock, ISNULL(cdf.packs_shipped, 0) AS packs_shipped, NULL AS packs_semi, NULL AS packs_finished, NULL AS packs_unpacked, cd.meters - ISNULL(cdf.meters_done, 0) 
+                         AS meters_needed, ISNULL(cdf.meters_done, 0) AS meters_done, ISNULL(cdf.meters_stock, 0) AS meters_stock, ISNULL(cdf.meters_shipped, 0) + ISNULL(d.meters_shipped, 0) AS meters_shipped, 
+                         cd.meters - ISNULL(cdf.meters_shipped, 0) - ISNULL(d.meters_shipped, 0) AS meters_balance, NULL AS meters_finished, NULL AS meters_semi, NULL AS meters_unpacked, 
+                         cd.square_meters - ISNULL(cdf.square_meters_done, 0) AS square_meters_needed, cd.square_meters - ISNULL(cdf.square_meters_shipped, 0) AS square_meters_balance, ISNULL(cdf.square_meters_done, 0) 
+                         AS square_meters_done, ISNULL(cdf.square_meters_stock, 0) AS square_meters_stock, ISNULL(cdf.square_meters_shipped, 0) AS square_meters_shipped, NULL AS square_meters_finished, NULL 
+                         AS square_meters_semi, NULL AS square_meters_unpacked, CASE WHEN cd.pieces IS NOT NULL THEN CAST(cd.pieces - isnull(cdf.pieces_done, 0) AS int) END AS pieces_needed, CASE WHEN cd.pieces IS NOT NULL 
+                         THEN CAST(isnull(cdf.pieces_done, 0) AS int) END AS pieces_done, CASE WHEN cd.pieces IS NOT NULL THEN CAST(isnull(cdf.pieces_stock, 0) AS int) END AS pieces_stock, CASE WHEN cd.pieces IS NOT NULL 
+                         THEN CAST(isnull(cdf.pieces_shipped, 0) AS int) END AS pieces_shipped, CASE WHEN cd.pieces IS NOT NULL THEN CAST(cd.pieces - isnull(cdf.pieces_shipped, 0) AS int) END AS pieces_balance, NULL 
+                         AS pieces_finished, NULL AS pieces_semi, NULL AS pieces_unpacked, cd.volume_coef * (cd.meters - ISNULL(cdf.meters_done, 0)) AS volume_needed, cd.volume_coef * ISNULL(cdf.meters_done, 0) AS volume_done, 
+                         cd.volume_coef * ISNULL(cdf.meters_stock, 0) AS volume_stock, cd.volume_coef * ISNULL(cdf.meters_shipped, 0) AS volume_shipped, cd.volume_coef * (cd.meters - ISNULL(cdf.meters_shipped, 0)) AS volume_balance, NULL 
+                         AS volume_finished, NULL AS volume_semi, NULL AS volume_unpacked, cd.pieces / NULLIF (NULLIF (cd.bundle_size, 0), 1) AS bundles, CASE WHEN cd.pieces IS NOT NULL THEN CAST((cd.pieces - isnull(cdf.pieces_done, 0)) 
+                         / NULLIF (NULLIF (cd.bundle_size, 0), 1) AS int) END AS bundles_needed, CASE WHEN cd.pieces IS NOT NULL THEN CAST(isnull(cdf.pieces_done, 0) / NULLIF (NULLIF (cd.bundle_size, 0), 1) AS int) END AS bundles_done, 
+                         CASE WHEN cd.pieces IS NOT NULL THEN CAST(isnull(cdf.pieces_stock, 0) / NULLIF (NULLIF (cd.bundle_size, 0), 1) AS int) END AS bundles_stock, CASE WHEN cd.pieces IS NOT NULL THEN CAST(isnull(cdf.pieces_shipped, 0) 
+                         / NULLIF (NULLIF (cd.bundle_size, 0), 1) AS int) END AS bundles_shipped, CASE WHEN cd.pieces IS NOT NULL THEN CAST((cd.pieces - isnull(cdf.pieces_shipped, 0)) / NULLIF (NULLIF (cd.bundle_size, 0), 1) AS int) 
+                         END AS bundles_balance, NULL AS bundles_finished, NULL AS bundles_semi, NULL AS bundles_unpacked, ISNULL(CAST((CASE WHEN cd.finished = 1 OR
+                         (cd.packs - packs_shipped - packs_stock) <= 0 THEN 0 ELSE 1 END) AS bit), 0) AS active, u.name AS trader, pc.name AS payment_condition, (cd.meters - ISNULL(cdf.meters_done, 0)) * cd.meter_price AS total_needed
+FROM            views.contract_delivery_list AS cd WITH (NOLOCK) INNER JOIN
+                         dbo.contract AS c ON cd.contract_id = c.id LEFT OUTER JOIN
+                         views.contract_row_filled_base_purchase AS cdf WITH (NOLOCK) ON cd.id = cdf.contract_delivery_id LEFT OUTER JOIN
+                         views.contract_row_filled_loads AS d ON cd.id = d.id LEFT OUTER JOIN
+                         webrock.wr_user AS u ON COALESCE (c.user_id_trader_seller, c.user_id_trader) = u.id LEFT OUTER JOIN
+                         dbo.payment_condition AS pc ON COALESCE (c.payment_condition_id_seller, c.payment_condition_id) = pc.id
+WHERE        (cd.purchase = 1)
