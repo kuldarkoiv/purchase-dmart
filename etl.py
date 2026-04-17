@@ -38,8 +38,8 @@ def ms_connect():
     )
     try:
         return pyodbc.connect(dsn)
-    except Exception:
-        log.error("MSSQL ühendus ebaõnnestus"); raise SystemExit(1)
+    except Exception as e:
+        log.error("MSSQL ühendus ebaõnnestus: %s", e); raise SystemExit(1)
 
 def pg_connect():
     try:
