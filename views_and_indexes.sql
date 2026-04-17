@@ -61,7 +61,7 @@ SELECT
     fulfillment_pct,
     order_comment
 FROM purchase_dmart.purchase_order_lines
-WHERE is_overdue IS TRUE
+WHERE is_overdue = 1
 ORDER BY days_since_due DESC;
 
 GRANT SELECT ON purchase_dmart.v_overdue_orders TO doadmin;

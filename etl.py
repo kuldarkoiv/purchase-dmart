@@ -64,7 +64,7 @@ def infer_pg_type(pyodbc_type_code, sample_value):
     if t == bytes: return "BYTEA"
     return "TEXT"
 
-def etl_table(ms, pg, sql_file, schema, table, dry_run=False):
+def etl_table(ms, pg, sql_file, schema, table, pk_col, dry_run=False):
     log.info(f"[{table}] Loen MSSQL-ist ({sql_file})...")
     sql = (SQL_DIR / sql_file).read_text(encoding="utf-8")
     cur = ms.cursor()
@@ -81,20 +81,19 @@ def etl_table(ms, pg, sql_file, schema, table, dry_run=False):
     pg_types = [infer_pg_type(None, v) for v in sample]
 
     pg_cur = pg.cursor()
-
-    # Loo skeem ja tabel automaatselt
     pg_cur.execute(f"CREATE SCHEMA IF NOT EXISTS {schema}")
+
+    # DROP + CREATE (view'd taastatakse ETL lõpus views_and_indexes.sql-ist)
     col_defs = ", ".join(f'"{c}" {t}' for c, t in zip(cols, pg_types))
     pg_cur.execute(f'DROP TABLE IF EXISTS {schema}.{table} CASCADE')
-    pg_cur.execute(f'CREATE TABLE {schema}.{table} ({col_defs}, etl_loaded_at TIMESTAMP)')
-    log.info(f"[{table}] Tabel loodud.")
+    pg_cur.execute(f'CREATE TABLE {schema}.{table} ({col_defs}, etl_loaded_at TIMESTAMP, PRIMARY KEY ("{pk_col}"))')
 
+    log.info(f"[{table}] Kirjutan {len(rows)} rida...")
     cols_sql = ", ".join(f'"{c}"' for c in cols) + ', "etl_loaded_at"'
     now = datetime.now()
     data = [tuple(row) + (now,) for row in rows]
     insert_sql = f'INSERT INTO {schema}.{table} ({cols_sql}) VALUES %s'
 
-    log.info(f"[{table}] Kirjutan {len(data)} rida...")
     psycopg2.extras.execute_values(pg_cur, insert_sql, data, page_size=2000)
     pg_cur.execute(f"GRANT SELECT ON {schema}.{table} TO doadmin")
     pg.commit()
@@ -113,9 +112,9 @@ def main():
     if pg: log.info("PostgreSQL OK")
     try:
         if args.table in ("orders","all"):
-            etl_table(ms, pg, "extract_order_lines.sql", "purchase_dmart", "purchase_order_lines", args.dry_run)
+            etl_table(ms, pg, "extract_order_lines.sql", "purchase_dmart", "purchase_order_lines", "order_line_id", args.dry_run)
         if args.table in ("products","all"):
-            etl_table(ms, pg, "extract_received_products.sql", "purchase_dmart", "purchase_material_products", args.dry_run)
+            etl_table(ms, pg, "extract_received_products.sql", "purchase_dmart", "purchase_material_products", "product_id", args.dry_run)
         if not args.dry_run and pg:
             log.info("Taastan views ja indeksid...")
             views_sql = (Path(__file__).parent / "views_and_indexes.sql").read_text(encoding="utf-8")
