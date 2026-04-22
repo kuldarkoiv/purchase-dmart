@@ -82,10 +82,10 @@ SELECT
     cd.packs - ISNULL(cdf.packs_shipped, 0)     AS balance_packs,
     cd.meters - ISNULL(cdf.meters_shipped, 0)   AS balance_meters,
 
-    -- Mahuarvutused m3 (height_mm * width_mm / 1_000_000 * meters = m3)
-    ROUND(cg.height * cg.width / 1000000.0 * ISNULL(cdf.meters_done, 0), 4)                    AS received_volume,
-    ROUND(cg.height * cg.width / 1000000.0 * ISNULL(cdf.meters_stock, 0), 4)                   AS stock_volume,
-    ROUND(cg.height * cg.width / 1000000.0 * (cd.meters - ISNULL(cdf.meters_done, 0)), 4)      AS pending_volume,
+    -- Mahuarvutused m3 (volume_coef on views.contract_delivery_list peal, ühik m3/m)
+    ROUND(purchase_filter.volume_coef * ISNULL(cdf.meters_done, 0), 4)                         AS received_volume,
+    ROUND(purchase_filter.volume_coef * ISNULL(cdf.meters_stock, 0), 4)                        AS stock_volume,
+    ROUND(cd.volume - purchase_filter.volume_coef * ISNULL(cdf.meters_done, 0), 4)             AS pending_volume,
 
     -- -------------------------------------------------------------------------
     -- TÄITMISE PROTSENT (kiire ülevaade)
@@ -150,9 +150,9 @@ INNER JOIN dbo.contract_goods cg
 INNER JOIN dbo.contract c
     ON cg.contract_id = c.id
 
--- Ainult ostulepingud (direction/purchase flag)
+-- Ainult ostulepingud (direction/purchase flag); võtame ka volume_coef sealt
 INNER JOIN (
-    SELECT cd2.id
+    SELECT cd2.id, cd2.volume_coef
     FROM views.contract_delivery_list cd2
     WHERE cd2.purchase = 1
 ) AS purchase_filter
