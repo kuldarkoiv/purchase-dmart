@@ -82,10 +82,10 @@ SELECT
     cd.packs - ISNULL(cdf.packs_shipped, 0)     AS balance_packs,
     cd.meters - ISNULL(cdf.meters_shipped, 0)   AS balance_meters,
 
-    -- Mahuarvutused m3 (volume_coef = süsteemi kordaja, ühik m3/m)
-    cd.volume_coef * ISNULL(cdf.meters_done, 0)                     AS received_volume,
-    cd.volume_coef * ISNULL(cdf.meters_stock, 0)                    AS stock_volume,
-    cd.volume_coef * (cd.meters - ISNULL(cdf.meters_done, 0))       AS pending_volume,
+    -- Mahuarvutused m3 (height_mm * width_mm / 1_000_000 * meters = m3)
+    ROUND(cg.height * cg.width / 1000000.0 * ISNULL(cdf.meters_done, 0), 4)                    AS received_volume,
+    ROUND(cg.height * cg.width / 1000000.0 * ISNULL(cdf.meters_stock, 0), 4)                   AS stock_volume,
+    ROUND(cg.height * cg.width / 1000000.0 * (cd.meters - ISNULL(cdf.meters_done, 0)), 4)      AS pending_volume,
 
     -- -------------------------------------------------------------------------
     -- TÄITMISE PROTSENT (kiire ülevaade)
