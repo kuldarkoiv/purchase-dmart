@@ -58,7 +58,10 @@ purchase-dmart/
 | `received_*` | Vastu võetud kogus |
 | `stock_*` | Hetkel laos |
 | `shipped_*` | Ekspedeeritud |
-| `pending_*` | Veel ootel |
+| `pending_*` | Veel ootel (packs, meters, volume) |
+| `received_volume` | Vastu võetud m3 (`volume_coef × meters_done`) |
+| `stock_volume` | Laos m3 (`volume_coef × meters_stock`) |
+| `pending_volume` | Ootel m3 (`ordered_volume − received_volume`) |
 | `fulfillment_pct` | Täitmise % |
 | `is_overdue` | 1 kui tähtaeg möödunud aga pole täidetud |
 | `days_since_due` | Positiivne = hilinenud päevade arv |
@@ -93,7 +96,7 @@ purchase-dmart/
 | `v_overdue_orders` | Ületähtaegsed ostutellimused |
 | `v_supplier_delivery_performance` | Tarnijate on-time %, keskmised hilinemised |
 | `v_material_journey` | Täielik materjali teekond ühes vaates |
-| `v_material_availability` | **Müügi ühtne vaade** — vaba ladu (`vaba_ladu`) + tulevikus saabuvad (`tulemas`), m3, `marking_comments`, `purchase_contract_archived` |
+| `v_material_availability` | **Müügi ühtne vaade** — vaba ladu (`vaba_ladu`) + tulevikus saabuvad (`tulemas`), m3, `marking_comments`, `purchase_contract_archived`. Arhiveeritud lepingud, millelt pole ühtegi pakki tulnud, on välistatud (`tulemas` segmendist). m3 `vaba_ladu` segmendis: `stock_volume / stock_packs` × vabalade pakkide arv. |
 
 ---
 
