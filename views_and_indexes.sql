@@ -180,14 +180,7 @@ pending AS (
     WHERE pol.pending_meters > 0
       AND pol.is_finished IS NOT TRUE
       AND pol.is_active = 1
-      -- välista arhiveeritud lepingud, millelt pole kunagi ühtegi pakki saabunud
-      AND NOT (
-          pol.purchase_contract_archived IS TRUE
-          AND NOT EXISTS (
-              SELECT 1 FROM purchase_dmart.purchase_material_products pmp2
-              WHERE pmp2.purchase_contract_number = pol.purchase_contract_number
-          )
-      )
+      AND pol.purchase_contract_archived IS NOT TRUE
 )
 SELECT 'vaba_ladu'  AS segment,
     species_name, grade_name, treatment_name,
