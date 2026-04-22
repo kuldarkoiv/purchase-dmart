@@ -22,6 +22,7 @@ SELECT
     cd.pieces                           AS ordered_pieces,
     cd.mark                             AS order_mark,
     cd.comment                          AS order_comment,          -- planeerija kommentaar real
+    cd.marking_comments                 AS marking_comments,       -- broneeringu märkus (kellele materjal mõeldud)
     cd.finished                         AS is_finished,            -- käsitsi märgitud lõpetatuks
     cd.production_date                  AS production_due_date,    -- millal valmis peab olema
     cd.notification_time                AS notification_due,        -- teavitamise tähtaeg

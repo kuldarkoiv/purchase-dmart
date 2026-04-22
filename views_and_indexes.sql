@@ -18,27 +18,32 @@ CREATE INDEX IF NOT EXISTS idx_pmp_arrival         ON purchase_dmart.purchase_ma
 
 CREATE OR REPLACE VIEW purchase_dmart.v_free_stock_by_article AS
 SELECT
-    species_name,
-    grade_name,
-    treatment_name,
-    spec_height,
-    spec_width,
-    spec_length_min,
-    spec_length,
-    cert_name,
-    supplier_name,
-    purchase_contract_number,
+    pmp.species_name,
+    pmp.grade_name,
+    pmp.treatment_name,
+    pmp.spec_height,
+    pmp.spec_width,
+    pmp.spec_length_min,
+    pmp.spec_length,
+    pmp.cert_name,
+    pmp.supplier_name,
+    pmp.purchase_contract_number,
     COUNT(*)                        AS free_packs,
-    STRING_AGG(DISTINCT product_comment, ' | ')
-        FILTER (WHERE product_comment IS NOT NULL AND product_comment <> '')
-                                    AS planner_comments
-FROM purchase_dmart.purchase_material_products
-WHERE material_status = 'vaba'
+    STRING_AGG(DISTINCT pmp.product_comment, ' | ')
+        FILTER (WHERE pmp.product_comment IS NOT NULL AND pmp.product_comment <> '')
+                                    AS planner_comments,
+    STRING_AGG(DISTINCT pol.marking_comments, ' | ')
+        FILTER (WHERE pol.marking_comments IS NOT NULL AND pol.marking_comments <> '')
+                                    AS marking_comments
+FROM purchase_dmart.purchase_material_products pmp
+LEFT JOIN purchase_dmart.purchase_order_lines pol
+    ON pmp.order_line_id = pol.order_line_id
+WHERE pmp.material_status = 'vaba'
 GROUP BY
-    species_name, grade_name, treatment_name, spec_height, spec_width,
-    spec_length_min, spec_length, cert_name, supplier_name,
-    purchase_contract_number
-ORDER BY article_group, species_name, grade_name;
+    pmp.species_name, pmp.grade_name, pmp.treatment_name, pmp.spec_height, pmp.spec_width,
+    pmp.spec_length_min, pmp.spec_length, pmp.cert_name, pmp.supplier_name,
+    pmp.purchase_contract_number
+ORDER BY pmp.species_name, pmp.grade_name;
 
 GRANT SELECT ON purchase_dmart.v_free_stock_by_article TO doadmin;
 
