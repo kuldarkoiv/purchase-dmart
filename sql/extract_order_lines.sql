@@ -34,6 +34,7 @@ SELECT
                                         AS purchase_contract_number,
     c.order_number                      AS purchase_order_number,
     c.sentdate                          AS contract_sent_date,
+    c.archived                          AS purchase_contract_archived,
 
     -- -------------------------------------------------------------------------
     -- TARNIJA
