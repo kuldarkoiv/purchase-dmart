@@ -24,6 +24,7 @@ PostgreSQL (purchase_dmart skeem)
   v_overdue_orders                # vaade: ületähtaegsed tellimused
   v_supplier_delivery_performance # vaade: tarnijate tarneetäpsus
   v_material_journey              # vaade: täismaatriks
+  v_material_availability         # vaade: müügi ühtne saadavuse vaade
 ```
 
 ---
@@ -146,7 +147,7 @@ python etl.py --table products
 python etl.py --dry-run
 ```
 
-ETL kestus: ~2 minutit (MSSQL lugemine ~40s + PG kirjutamine ~70s 98k rea jaoks).
+ETL kestus: ~36 sekundit (MSSQL lugemine ~8s + PG kirjutamine ~28s 98k rea jaoks).
 
 ---
 
