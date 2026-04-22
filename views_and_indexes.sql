@@ -180,21 +180,23 @@ pending AS (
         ROUND((pol.height * pol.width / 1000000.0 * pol.pending_meters)::NUMERIC, 3) AS m3
     FROM purchase_dmart.purchase_order_lines pol
     WHERE pol.pending_meters > 0
-      AND pol.is_finished = 0
+      AND pol.is_finished IS NOT TRUE
       AND pol.is_active = 1
 )
 SELECT 'vaba_ladu'  AS segment,
     species_name, grade_name, treatment_name,
     height, width, length_min, length, cert_name,
     supplier_name, purchase_contract_number, purchase_contract_archived,
-    order_due_date, marking_comments, packs, m3
+    order_due_date, marking_comments, packs::NUMERIC AS packs, m3
 FROM free_stock
 UNION ALL
 SELECT 'tulemas'    AS segment,
     species_name, grade_name, treatment_name,
     height, width, length_min, length, cert_name,
     supplier_name, purchase_contract_number, purchase_contract_archived,
-    order_due_date, marking_comments, packs, m3
+    order_due_date, marking_comments,
+    packs::TEXT::NUMERIC AS packs,
+    m3
 FROM pending
 ORDER BY species_name, grade_name, height, width, length, segment;
 
