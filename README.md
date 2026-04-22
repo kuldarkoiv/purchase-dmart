@@ -88,10 +88,11 @@ purchase-dmart/
 
 | Vaade | Eesmärk |
 |---|---|
-| `v_free_stock_by_article` | Vaba laovaru liigi/kvaliteedi/mõõtude kaupa — kuvab `purchase_contract_number`, `marking_comments` (kellele materjal mõeldud), `planner_comments` |
+| `v_free_stock_by_article` | Vaba laovaru liigi/kvaliteedi/mõõtude kaupa — `purchase_contract_number`, `marking_comments`, `planner_comments` |
 | `v_overdue_orders` | Ületähtaegsed ostutellimused |
 | `v_supplier_delivery_performance` | Tarnijate on-time %, keskmised hilinemised |
 | `v_material_journey` | Täielik materjali teekond ühes vaates |
+| `v_material_availability` | **Müügi ühtne vaade** — vaba ladu (`vaba_ladu`) + tulevikus saabuvad (`tulemas`), m3, `marking_comments`, `purchase_contract_archived` |
 
 ---
 
