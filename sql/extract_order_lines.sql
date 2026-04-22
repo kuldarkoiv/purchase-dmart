@@ -78,9 +78,6 @@ SELECT
     -- Allesjäänud (veel pole kohale jõudnud)
     cd.packs - ISNULL(cdf.packs_done, 0)    AS pending_packs,
     cd.meters - ISNULL(cdf.meters_done, 0)  AS pending_meters,
-    ROUND(CAST(
-        cd.volume_coef * (cd.meters - ISNULL(cdf.meters_done, 0))
-    AS DECIMAL(10,3)), 3)                   AS pending_volume,
     -- Balance (tellitud - ekspedeeritud)
     cd.packs - ISNULL(cdf.packs_shipped, 0)     AS balance_packs,
     cd.meters - ISNULL(cdf.meters_shipped, 0)   AS balance_meters,

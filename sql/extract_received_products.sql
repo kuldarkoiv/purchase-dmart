@@ -25,7 +25,6 @@ SELECT
     cd_pur.due_seller                   AS order_due_seller,     -- müüja-poolne lubad tähtaeg
     cd_pur.meters                       AS order_meters,
     cd_pur.packs                        AS order_packs,
-    p.meters                            AS pack_meters,          -- meetrid selles pakis (m3 arvutuseks)
     cd_pur.mark                         AS order_mark,
     cd_pur.finished                     AS order_finished,       -- tellimus märgitud lõpetatuks
     cd_pur.comment                      AS order_line_comment,   -- planeerija kommentaar real
