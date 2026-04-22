@@ -18,9 +18,6 @@ CREATE INDEX IF NOT EXISTS idx_pmp_arrival         ON purchase_dmart.purchase_ma
 
 CREATE OR REPLACE VIEW purchase_dmart.v_free_stock_by_article AS
 SELECT
-    article_group_id,
-    article_group,
-    article_name,
     species_name,
     grade_name,
     treatment_name,
@@ -38,8 +35,7 @@ SELECT
 FROM purchase_dmart.purchase_material_products
 WHERE material_status = 'vaba'
 GROUP BY
-    article_group_id, article_group, article_name, species_name,
-    grade_name, treatment_name, spec_height, spec_width,
+    species_name, grade_name, treatment_name, spec_height, spec_width,
     spec_length_min, spec_length, cert_name, supplier_name,
     purchase_contract_number
 ORDER BY article_group, species_name, grade_name;
