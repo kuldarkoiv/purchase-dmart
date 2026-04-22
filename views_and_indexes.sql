@@ -149,9 +149,7 @@ WITH free_stock AS (
         pmp.order_due_date,
         pol.marking_comments,
         COUNT(*)                                            AS packs,
-        ROUND(SUM(
-            pmp.spec_height * pmp.spec_width * pmp.spec_length / 1000000000.0
-        )::NUMERIC, 3)                                      AS m3
+        ROUND(SUM(pol.stock_volume / NULLIF(pol.stock_packs::NUMERIC, 0))::NUMERIC, 3) AS m3
     FROM purchase_dmart.purchase_material_products pmp
     LEFT JOIN purchase_dmart.purchase_order_lines pol
         ON pmp.order_line_id = pol.order_line_id
