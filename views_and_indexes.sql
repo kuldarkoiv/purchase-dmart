@@ -30,6 +30,7 @@ SELECT
     spec_length,
     cert_name,
     supplier_name,
+    purchase_contract_number,
     COUNT(*)                        AS free_packs,
     STRING_AGG(DISTINCT product_comment, ' | ')
         FILTER (WHERE product_comment IS NOT NULL AND product_comment <> '')
@@ -39,7 +40,8 @@ WHERE material_status = 'vaba'
 GROUP BY
     article_group_id, article_group, article_name, species_name,
     grade_name, treatment_name, spec_height, spec_width,
-    spec_length_min, spec_length, cert_name, supplier_name
+    spec_length_min, spec_length, cert_name, supplier_name,
+    purchase_contract_number
 ORDER BY article_group, species_name, grade_name;
 
 GRANT SELECT ON purchase_dmart.v_free_stock_by_article TO doadmin;
