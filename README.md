@@ -63,6 +63,8 @@ purchase-dmart/
 | `days_since_due` | Positiivne = hilinenud päevade arv |
 | `days_first_arrival_vs_due` | Esimese pakki hilinemine vs due |
 | `order_comment` | Planeerija kommentaar real |
+| `marking_comments` | Broneeringu märkus — kellele materjal mõeldud |
+| `purchase_contract_archived` | Kas ostuleping on arhiveeritud |
 
 ### `purchase_material_products`
 Üks rida = üks füüsiline pakk.
@@ -80,12 +82,13 @@ purchase-dmart/
 | `sales_contract_number` | Mis müügilepingusse reserveeritud |
 | `customer_name` | Klient |
 | `product_comment` | Planeerija märkus pakil |
+| `purchase_contract_archived` | Kas ostuleping on arhiveeritud |
 
 ### Vaated
 
 | Vaade | Eesmärk |
 |---|---|
-| `v_free_stock_by_article` | Vaba laovaru artiklite kaupa |
+| `v_free_stock_by_article` | Vaba laovaru liigi/kvaliteedi/mõõtude kaupa — kuvab `purchase_contract_number`, `marking_comments` (kellele materjal mõeldud), `planner_comments` |
 | `v_overdue_orders` | Ületähtaegsed ostutellimused |
 | `v_supplier_delivery_performance` | Tarnijate on-time %, keskmised hilinemised |
 | `v_material_journey` | Täielik materjali teekond ühes vaates |
@@ -150,13 +153,13 @@ ETL kestus: ~2 minutit (MSSQL lugemine ~40s + PG kirjutamine ~70s 98k rea jaoks)
 
 ### Eeldused
 - DO Managed PostgreSQL klaster (sslmode=require)
-- DO Droplet või App Platform Python worker
-- ODBC Driver 18 installitud: `apt install msodbcsql18`
+- DO App Platform Job (Dockerfile)
+- **Build Settings → vali Dockerfile** (mitte buildpack — ODBC Driver vajab Dockerfile'i)
 
-### Cron (igapäevane ETL)
+### Cron
 
-```cron
-0 4 * * * cd /opt/purchase-dmart && python etl.py >> /var/log/purchase-dmart-etl.log 2>&1
+```
+0 * * * *   # iga tund
 ```
 
-Env muutujad DO-s: sea kõik muutujad App Platform env-ina või Dropletil `/opt/purchase-dmart/.env` failina.
+Env muutujad seata DO UI-s App → Settings → Environment Variables.
