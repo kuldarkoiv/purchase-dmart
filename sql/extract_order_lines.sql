@@ -82,6 +82,11 @@ SELECT
     cd.packs - ISNULL(cdf.packs_shipped, 0)     AS balance_packs,
     cd.meters - ISNULL(cdf.meters_shipped, 0)   AS balance_meters,
 
+    -- Mahuarvutused m3 (volume_coef = süsteemi kordaja, ühik m3/m)
+    cd.volume_coef * ISNULL(cdf.meters_done, 0)                     AS received_volume,
+    cd.volume_coef * ISNULL(cdf.meters_stock, 0)                    AS stock_volume,
+    cd.volume_coef * (cd.meters - ISNULL(cdf.meters_done, 0))       AS pending_volume,
+
     -- -------------------------------------------------------------------------
     -- TÄITMISE PROTSENT (kiire ülevaade)
     -- -------------------------------------------------------------------------

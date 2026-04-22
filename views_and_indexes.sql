@@ -177,11 +177,19 @@ pending AS (
         pol.order_due_date,
         pol.marking_comments,
         pol.pending_packs                                   AS packs,
-        ROUND((pol.height * pol.width / 1000000.0 * pol.pending_meters)::NUMERIC, 3) AS m3
+        ROUND(pol.pending_volume::NUMERIC, 3)               AS m3
     FROM purchase_dmart.purchase_order_lines pol
     WHERE pol.pending_meters > 0
       AND pol.is_finished IS NOT TRUE
       AND pol.is_active = 1
+      -- välista arhiveeritud lepingud, millelt pole kunagi ühtegi pakki saabunud
+      AND NOT (
+          pol.purchase_contract_archived IS TRUE
+          AND NOT EXISTS (
+              SELECT 1 FROM purchase_dmart.purchase_material_products pmp2
+              WHERE pmp2.purchase_contract_number = pol.purchase_contract_number
+          )
+      )
 )
 SELECT 'vaba_ladu'  AS segment,
     species_name, grade_name, treatment_name,
