@@ -20,6 +20,7 @@ SELECT
     cd.volume                           AS ordered_volume,
     cd.square_meters                    AS ordered_sqm,
     cd.pieces                           AS ordered_pieces,
+    purchase_filter.price_m3            AS price_m3,
     cd.mark                             AS order_mark,
     cd.comment                          AS order_comment,          -- planeerija kommentaar real
     cd.marking_comments                 AS marking_comments,       -- broneeringu märkus (kellele materjal mõeldud)
@@ -152,7 +153,7 @@ INNER JOIN dbo.contract c
 
 -- Ainult ostulepingud (direction/purchase flag); võtame ka volume_coef sealt
 INNER JOIN (
-    SELECT cd2.id, cd2.volume_coef
+    SELECT cd2.id, cd2.volume_coef, cd2.price_m3
     FROM views.contract_delivery_list cd2
     WHERE cd2.purchase = 1
 ) AS purchase_filter

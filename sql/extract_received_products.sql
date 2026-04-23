@@ -28,6 +28,7 @@ SELECT
     cd_pur.mark                         AS order_mark,
     cd_pur.finished                     AS order_finished,       -- tellimus märgitud lõpetatuks
     cd_pur.comment                      AS order_line_comment,   -- planeerija kommentaar real
+    cdl_pur.price_m3                    AS price_m3,               -- toorme hind €/m3
 
     -- -------------------------------------------------------------------------
     -- OSTULEPING (CONTRACT - purchase)
@@ -205,6 +206,10 @@ LEFT JOIN dbo.account a_cust
 
 LEFT JOIN dbo.contract_delivery cd_sal
     ON p.contract_delivery_id = cd_sal.id
+
+-- price_m3 ostutellimuse realt (views.contract_delivery_list kaudu)
+LEFT JOIN views.contract_delivery_list cdl_pur
+    ON cd_pur.id = cdl_pur.id
 
 WHERE
     -- Ainult ostetud materjal (mitte ise toodetud)
