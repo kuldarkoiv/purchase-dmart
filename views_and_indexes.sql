@@ -149,7 +149,10 @@ WITH free_stock AS (
         pmp.order_due_date,
         pol.marking_comments,
         COUNT(*)                                            AS packs,
-        ROUND(SUM(pol.stock_volume / NULLIF(pol.stock_packs::NUMERIC, 0))::NUMERIC, 3) AS m3
+        ROUND(SUM(pol.stock_volume / NULLIF(pol.stock_packs::NUMERIC, 0))::NUMERIC, 3) AS m3,
+        STRING_AGG(DISTINCT pmp.product_comment, ' | ')
+            FILTER (WHERE pmp.product_comment IS NOT NULL AND pmp.product_comment <> '')
+                                                            AS product_comment
     FROM purchase_dmart.purchase_material_products pmp
     LEFT JOIN purchase_dmart.purchase_order_lines pol
         ON pmp.order_line_id = pol.order_line_id
@@ -175,7 +178,8 @@ pending AS (
         pol.order_due_date,
         pol.marking_comments,
         pol.pending_packs                                   AS packs,
-        ROUND(pol.pending_volume::NUMERIC, 3)               AS m3
+        ROUND(pol.pending_volume::NUMERIC, 3)               AS m3,
+        NULL::TEXT                                          AS product_comment
     FROM purchase_dmart.purchase_order_lines pol
     WHERE pol.pending_meters > 0
       AND pol.is_finished IS NOT TRUE
@@ -186,7 +190,8 @@ SELECT 'vaba_ladu'  AS segment,
     species_name, grade_name, treatment_name,
     height, width, length_min, length, cert_name,
     supplier_name, purchase_contract_number, purchase_contract_archived,
-    order_due_date, marking_comments, packs::NUMERIC AS packs, m3
+    order_due_date, marking_comments, packs::NUMERIC AS packs, m3,
+    product_comment
 FROM free_stock
 UNION ALL
 SELECT 'tulemas'    AS segment,
@@ -195,7 +200,8 @@ SELECT 'tulemas'    AS segment,
     supplier_name, purchase_contract_number, purchase_contract_archived,
     order_due_date, marking_comments,
     packs::TEXT::NUMERIC AS packs,
-    m3
+    m3,
+    product_comment
 FROM pending
 ORDER BY species_name, grade_name, height, width, length, segment;
 
