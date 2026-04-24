@@ -135,6 +135,15 @@ SELECT
     p.comment                           AS product_comment,           -- pakitaseme kommentaar
 
     -- -------------------------------------------------------------------------
+    -- TEGELIK PIKKUS JA MAHT (product_piece)
+    -- Mixed pakil tekib mitu rida (1 rida = 1 pikkus)
+    -- -------------------------------------------------------------------------
+    CAST(pp.length AS INT)              AS actual_length_mm,          -- tegelik pikkus mm-s (nt 3600)
+    pp.volume_purchase                  AS actual_volume_m3,          -- selle pikkuse m3
+    CASE WHEN piece_counts.cnt > 1 THEN 1 ELSE 0 END
+                                        AS is_mixed_length,           -- 1 = pakis mitu eri pikkust
+
+    -- -------------------------------------------------------------------------
     -- TEHNILINE AUDIT
     -- -------------------------------------------------------------------------
     p.wr_created                        AS product_created_at,
@@ -183,6 +192,18 @@ LEFT JOIN dbo.processing_work pw_in
 
 LEFT JOIN webrock.wr_enum_value ev_ws_in
     ON pw_in.work_status_id = ev_ws_in.id
+
+-- Tegelikud pikkused (product_piece) — INNER JOIN: ainult pakid mille pikkus on môõdetud
+-- Mixed pakil (mitu pikkust) tekib siit mitu rida
+INNER JOIN dbo.product_piece pp
+    ON p.id = pp.product_id
+
+-- Mitu eri pikkust on selles pakis (mixed tuvastuseks)
+INNER JOIN (
+    SELECT product_id, COUNT(*) AS cnt
+    FROM dbo.product_piece
+    GROUP BY product_id
+) piece_counts ON p.id = piece_counts.product_id
 
 -- Müügilepingu seos
 LEFT JOIN dbo.contract c_sal

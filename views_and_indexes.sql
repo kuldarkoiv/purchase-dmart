@@ -27,7 +27,7 @@ SELECT
     pmp.cert_name,
     pmp.supplier_name,
     pmp.purchase_contract_number,
-    COUNT(*)                        AS free_packs,
+    COUNT(DISTINCT pmp.product_id)    AS free_packs,
     STRING_AGG(DISTINCT pmp.product_comment, ' | ')
         FILTER (WHERE pmp.product_comment IS NOT NULL AND pmp.product_comment <> '')
                                     AS planner_comments,
@@ -72,14 +72,14 @@ CREATE OR REPLACE VIEW purchase_dmart.v_supplier_delivery_performance AS
 SELECT
     supplier_id,
     supplier_name,
-    COUNT(*)                                    AS total_received_packs,
-    SUM(CASE WHEN is_on_time = 1 THEN 1 ELSE 0 END)
-                                                AS on_time_packs,
-    SUM(CASE WHEN is_on_time = 0 THEN 1 ELSE 0 END)
-                                                AS late_packs,
+    COUNT(DISTINCT product_id)                           AS total_received_packs,
+    COUNT(DISTINCT CASE WHEN is_on_time = 1 THEN product_id END)
+                                                        AS on_time_packs,
+    COUNT(DISTINCT CASE WHEN is_on_time = 0 THEN product_id END)
+                                                        AS late_packs,
     ROUND(
-        100.0 * SUM(CASE WHEN is_on_time = 1 THEN 1 ELSE 0 END)
-        / NULLIF(COUNT(*), 0), 1
+        100.0 * COUNT(DISTINCT CASE WHEN is_on_time = 1 THEN product_id END)
+        / NULLIF(COUNT(DISTINCT CASE WHEN is_on_time IS NOT NULL THEN product_id END), 0), 1
     )                                           AS on_time_pct,
     ROUND(AVG(days_late::NUMERIC), 1)           AS avg_days_late,
     MAX(days_late)                              AS max_days_late
@@ -146,8 +146,9 @@ WITH free_stock AS (
         pmp.purchase_contract_archived,
         pmp.order_due_date,
         pol.marking_comments,
-        COUNT(*)                                            AS packs,
-        ROUND(SUM(pol.stock_volume / NULLIF(pol.stock_packs::NUMERIC, 0))::NUMERIC, 3) AS m3,
+        pmp.actual_length_mm,
+        COUNT(DISTINCT pmp.product_id)                          AS packs,
+        ROUND(SUM(pmp.actual_volume_m3)::NUMERIC, 3)            AS m3,
         STRING_AGG(DISTINCT pmp.product_comment, ' | ')
             FILTER (WHERE pmp.product_comment IS NOT NULL AND pmp.product_comment <> '')
                                                             AS product_comment
@@ -159,7 +160,8 @@ WITH free_stock AS (
         pmp.species_name, pmp.grade_name, pmp.treatment_name,
         pmp.spec_height, pmp.spec_width, pmp.spec_length_min, pmp.spec_length,
         pmp.cert_name, pmp.supplier_name, pmp.purchase_contract_number,
-        pmp.purchase_contract_archived, pmp.order_due_date, pol.marking_comments),
+        pmp.purchase_contract_archived, pmp.order_due_date, pol.marking_comments,
+        pmp.actual_length_mm),
 pending AS (
     SELECT
         pol.species_name,
@@ -188,7 +190,8 @@ SELECT 'vaba_ladu'  AS segment,
     species_name, grade_name, treatment_name,
     height, width, length_min, length, cert_name,
     supplier_name, purchase_contract_number, purchase_contract_archived,
-    order_due_date, marking_comments, packs::NUMERIC AS packs, m3,
+    order_due_date, marking_comments, actual_length_mm,
+    packs::NUMERIC AS packs, m3,
     product_comment
 FROM free_stock
 UNION ALL
@@ -197,10 +200,11 @@ SELECT 'tulemas'    AS segment,
     height, width, length_min, length, cert_name,
     supplier_name, purchase_contract_number, purchase_contract_archived,
     order_due_date, marking_comments,
+    NULL::BIGINT     AS actual_length_mm,
     packs::TEXT::NUMERIC AS packs,
     m3,
     product_comment
 FROM pending
-ORDER BY species_name, grade_name, height, width, length, segment;
+ORDER BY species_name, grade_name, height, width, length, actual_length_mm NULLS LAST, segment;
 
 GRANT SELECT ON purchase_dmart.v_material_availability TO doadmin;

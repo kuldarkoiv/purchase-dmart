@@ -86,7 +86,12 @@ def etl_table(ms, pg, sql_file, schema, table, pk_col, dry_run=False):
     # DROP + CREATE (view'd taastatakse ETL lõpus views_and_indexes.sql-ist)
     col_defs = ", ".join(f'"{c}" {t}' for c, t in zip(cols, pg_types))
     pg_cur.execute(f'DROP TABLE IF EXISTS {schema}.{table} CASCADE')
-    pg_cur.execute(f'CREATE TABLE {schema}.{table} ({col_defs}, etl_loaded_at TIMESTAMP, PRIMARY KEY ("{pk_col}"))')
+    # pk_col võib olla string (üks veerg) või list/tuple (composite PK)
+    if isinstance(pk_col, (list, tuple)):
+        pk_def = ", ".join(f'"{c}"' for c in pk_col)
+    else:
+        pk_def = f'"{pk_col}"'
+    pg_cur.execute(f'CREATE TABLE {schema}.{table} ({col_defs}, etl_loaded_at TIMESTAMP, PRIMARY KEY ({pk_def}))')
 
     log.info(f"[{table}] Kirjutan {len(rows)} rida...")
     cols_sql = ", ".join(f'"{c}"' for c in cols) + ', "etl_loaded_at"'
@@ -114,7 +119,7 @@ def main():
         if args.table in ("orders","all"):
             etl_table(ms, pg, "extract_order_lines.sql", "purchase_dmart", "purchase_order_lines", "order_line_id", args.dry_run)
         if args.table in ("products","all"):
-            etl_table(ms, pg, "extract_received_products.sql", "purchase_dmart", "purchase_material_products", "product_id", args.dry_run)
+            etl_table(ms, pg, "extract_received_products.sql", "purchase_dmart", "purchase_material_products", ["product_id", "actual_length_mm"], args.dry_run)
         if not args.dry_run and pg:
             log.info("Taastan views ja indeksid...")
             views_sql = (Path(__file__).parent / "views_and_indexes.sql").read_text(encoding="utf-8")
