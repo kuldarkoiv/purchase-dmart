@@ -196,7 +196,7 @@ SELECT 'vaba_ladu'  AS segment,
         || '&wt_f_height_purchase=%22' || ROUND(height)::TEXT || '%22'
         || '&wt_f_width_purchase=%22'  || ROUND(width)::TEXT  || '%22'
         || '&wt_f_length='             || actual_length_mm::TEXT
-        || '&'                          AS erp_url
+        || '&wt_f_comment=-&'          AS erp_url
 FROM free_stock
 UNION ALL
 SELECT 'tulemas'    AS segment,
