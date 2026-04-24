@@ -104,6 +104,7 @@ SELECT
         WHEN p.actual_used IS NOT NULL                                  THEN 'tarbitud'
         WHEN p.shipment_id IS NOT NULL                                  THEN 'ekspedeeritud'
         WHEN p.contract_delivery_id IS NOT NULL OR p.bron = 1           THEN 'reserveeritud'
+        WHEN p.contract_id IS NOT NULL                                  THEN 'reserveeritud'
         WHEN p.processing_work_id_in IS NOT NULL                        THEN 'tootmises'
         ELSE                                                                 'vaba'
     END                                 AS material_status,
