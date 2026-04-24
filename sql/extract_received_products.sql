@@ -98,12 +98,13 @@ SELECT
     p.done                              AS is_done,
     p.fn                                AS is_finished_good,     -- 1 = valmistoode (ei tohiks olla purchased material puhul)
 
-    -- Koondstaatus (prioriteet: maha kantud > tarbitud > ekspedeeritud > reserveeritud > vaba)
+    -- Koondstaatus (prioriteet: maha kantud > tarbitud > ekspedeeritud > reserveeritud > tootmises > vaba)
     CASE
         WHEN p.wrote_off = 1                                            THEN 'maha_kantud'
         WHEN p.actual_used IS NOT NULL                                  THEN 'tarbitud'
         WHEN p.shipment_id IS NOT NULL                                  THEN 'ekspedeeritud'
         WHEN p.contract_delivery_id IS NOT NULL OR p.bron = 1           THEN 'reserveeritud'
+        WHEN p.processing_work_id_in IS NOT NULL                        THEN 'tootmises'
         ELSE                                                                 'vaba'
     END                                 AS material_status,
 
