@@ -146,6 +146,12 @@ SELECT
                                         AS is_mixed_length,           -- 1 = pakis mitu eri pikkust
 
     -- -------------------------------------------------------------------------
+    -- LAOKOHT (kus pakk füüsiliselt asub)
+    -- -------------------------------------------------------------------------
+    p.account_id_stock                  AS stock_account_id,          -- laokonto ID (1 = Natural enda ladu)
+    a_stock.name                        AS stock_name,                -- laokonto nimi (nt OÜ Thermoarena)
+
+    -- -------------------------------------------------------------------------
     -- TEHNILINE AUDIT
     -- -------------------------------------------------------------------------
     p.wr_created                        AS product_created_at,
@@ -216,6 +222,10 @@ LEFT JOIN dbo.account a_cust
 
 LEFT JOIN dbo.contract_delivery cd_sal
     ON p.contract_delivery_id = cd_sal.id
+
+-- Laokoht (kus pakk füüsiliselt asub)
+LEFT JOIN dbo.account a_stock
+    ON p.account_id_stock = a_stock.id
 
 -- price_m3 ostutellimuse realt (views.contract_delivery_list kaudu)
 LEFT JOIN views.contract_delivery_list cdl_pur
