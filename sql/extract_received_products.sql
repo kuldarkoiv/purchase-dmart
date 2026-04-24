@@ -108,6 +108,7 @@ SELECT
         WHEN p.processing_work_id_in IS NOT NULL                        THEN 'tootmises'
         WHEN p.purchase_contract_row_id IS NULL
          AND p.purchase_waybill_id IS NOT NULL                          THEN 'ekspedeeritud'
+        WHEN p.account_id_stock != 1                                    THEN 'ekspedeeritud'
         ELSE                                                                 'vaba'
     END                                 AS material_status,
 
