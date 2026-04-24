@@ -136,10 +136,10 @@ WITH free_stock AS (
         pmp.species_name,
         pmp.grade_name,
         pmp.treatment_name,
-        pmp.spec_height                                     AS height,
-        pmp.spec_width                                      AS width,
+        COALESCE(pmp.spec_height, pmp.actual_height)         AS height,
+        COALESCE(pmp.spec_width, pmp.actual_width)           AS width,
         pmp.spec_length_min                                 AS length_min,
-        pmp.spec_length                                     AS length,
+        COALESCE(pmp.spec_length, pmp.actual_length_mm)     AS length,
         pmp.cert_name,
         pmp.supplier_name,
         pmp.purchase_contract_number,
@@ -157,7 +157,7 @@ WITH free_stock AS (
       AND pmp.work_in_status IS NULL
     GROUP BY
         pmp.species_name, pmp.grade_name, pmp.treatment_name,
-        pmp.spec_height, pmp.spec_width, pmp.spec_length_min, pmp.spec_length,
+        COALESCE(pmp.spec_height, pmp.actual_height), COALESCE(pmp.spec_width, pmp.actual_width), pmp.spec_length_min, COALESCE(pmp.spec_length, pmp.actual_length_mm),
         pmp.cert_name, pmp.supplier_name, pmp.purchase_contract_number,
         pmp.purchase_contract_archived, pmp.order_due_date, pol.marking_comments,
         pmp.actual_length_mm, pmp.product_comment),
