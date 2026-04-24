@@ -13,7 +13,6 @@ CREATE INDEX IF NOT EXISTS idx_pmp_supplier        ON purchase_dmart.purchase_ma
 CREATE INDEX IF NOT EXISTS idx_pmp_due             ON purchase_dmart.purchase_material_products (order_due_date);
 CREATE INDEX IF NOT EXISTS idx_pmp_sales_contract  ON purchase_dmart.purchase_material_products (sales_contract_id);
 CREATE INDEX IF NOT EXISTS idx_pmp_waybill         ON purchase_dmart.purchase_material_products (waybill_id);
-CREATE INDEX IF NOT EXISTS idx_pmp_article_group   ON purchase_dmart.purchase_material_products (article_group_id);
 CREATE INDEX IF NOT EXISTS idx_pmp_arrival         ON purchase_dmart.purchase_material_products (effective_arrival_date);
 
 CREATE OR REPLACE VIEW purchase_dmart.v_free_stock_by_article AS
@@ -97,8 +96,6 @@ SELECT
     pmp.product_label,
     pmp.purchase_contract_number,
     pmp.supplier_name,
-    pmp.article_group,
-    pmp.article_name,
     pmp.species_name,
     pmp.grade_name,
     pmp.spec_height,
@@ -110,12 +107,13 @@ SELECT
     pmp.is_on_time,
     pmp.material_status,
     pmp.consumed_at,
-    pmp.wrote_off_date,
     pmp.sales_contract_number,
     pmp.customer_name,
     pmp.sales_delivery_due,
     pmp.product_comment,
-    pmp.order_line_comment,
+    pmp.work_in_number,
+    pmp.work_in_status,
+    pmp.work_in_archived,
     pol.is_overdue                              AS order_is_overdue,
     pol.days_since_due                          AS order_days_since_due,
     pol.fulfillment_pct                         AS order_fulfillment_pct
