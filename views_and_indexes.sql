@@ -147,21 +147,20 @@ WITH free_stock AS (
         pmp.order_due_date,
         pol.marking_comments,
         pmp.actual_length_mm,
+        pmp.product_comment,
         COUNT(DISTINCT pmp.product_id)                          AS packs,
-        ROUND(SUM(pmp.actual_volume_m3)::NUMERIC, 3)            AS m3,
-        STRING_AGG(DISTINCT pmp.product_comment, ' | ')
-            FILTER (WHERE pmp.product_comment IS NOT NULL AND pmp.product_comment <> '')
-                                                            AS product_comment
+        ROUND(SUM(pmp.actual_volume_m3)::NUMERIC, 3)            AS m3
     FROM purchase_dmart.purchase_material_products pmp
     LEFT JOIN purchase_dmart.purchase_order_lines pol
         ON pmp.order_line_id = pol.order_line_id
     WHERE pmp.material_status = 'vaba'
+      AND pmp.work_in_status IS NULL
     GROUP BY
         pmp.species_name, pmp.grade_name, pmp.treatment_name,
         pmp.spec_height, pmp.spec_width, pmp.spec_length_min, pmp.spec_length,
         pmp.cert_name, pmp.supplier_name, pmp.purchase_contract_number,
         pmp.purchase_contract_archived, pmp.order_due_date, pol.marking_comments,
-        pmp.actual_length_mm),
+        pmp.actual_length_mm, pmp.product_comment),
 pending AS (
     SELECT
         pol.species_name,
