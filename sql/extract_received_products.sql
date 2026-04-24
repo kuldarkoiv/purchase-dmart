@@ -14,7 +14,6 @@ SELECT
     p.id                                AS product_id,
     p.number1                           AS product_label,       -- füüsiline märgis pakil
     p.number2                           AS product_number2,
-    p.number_original                   AS product_number_original,
 
     -- -------------------------------------------------------------------------
     -- OSTULEPINGU RIDA (CONTRACT_DELIVERY - purchase tellimus)
@@ -22,12 +21,8 @@ SELECT
     cd_pur.id                           AS order_line_id,
     cd_pur.delivery_number              AS order_line_number,
     cd_pur.due                          AS order_due_date,       -- lubatud tarnekuupäev
-    cd_pur.due_seller                   AS order_due_seller,     -- müüja-poolne lubad tähtaeg
     cd_pur.meters                       AS order_meters,
-    cd_pur.packs                        AS order_packs,
-    cd_pur.mark                         AS order_mark,
     cd_pur.finished                     AS order_finished,       -- tellimus märgitud lõpetatuks
-    cd_pur.comment                      AS order_line_comment,   -- planeerija kommentaar real
     cdl_pur.price_m3                    AS price_m3,               -- toorme hind €/m3
 
     -- -------------------------------------------------------------------------
@@ -57,12 +52,6 @@ SELECT
     -- Tegelikud ostumõõdud (mõõdetud pakil)
     p.height_purchase                   AS actual_height,
     p.width_purchase                    AS actual_width,
-    -- Artikkel / tootegrupp
-    art.id                              AS article_id,
-    art.article_group_id,
-    art.article_group,
-    COALESCE(art.article_base, art.article_der) AS article_name,
-    art.type_id                         AS article_type_id,
     -- Liik, kvaliteet, töötlus, sert
     sp.name                             AS species_name,
     g.name                              AS grade_name,
@@ -99,7 +88,6 @@ SELECT
     -- -------------------------------------------------------------------------
     p.bron                              AS is_reserved_bron,     -- kasutaja poolt kinni pandud
     p.wrote_off                         AS is_wrote_off,         -- maha kantud (kadu/häving)
-    p.wrote_off_date_c                  AS wrote_off_date,
     CASE WHEN p.actual_used IS NOT NULL    THEN 1 ELSE 0 END
                                         AS is_consumed,          -- tarbitud tootmises
     p.actual_used                       AS consumed_at,          -- millal tarbiti
@@ -107,8 +95,6 @@ SELECT
                                         AS is_shipped,           -- ekspedeeritud kliendile
     CASE WHEN p.contract_delivery_id IS NOT NULL OR p.bron = 1 THEN 1 ELSE 0 END
                                         AS is_allocated,         -- reserveeritud müügilepingusse
-    p.actual_creation                   AS received_at,          -- süsteemi sisestamise aeg
-    p.actual_finished                   AS finished_at,          -- töötluse lõpp (kui oli töötlus)
     p.done                              AS is_done,
     p.fn                                AS is_finished_good,     -- 1 = valmistoode (ei tohiks olla purchased material puhul)
 
@@ -122,13 +108,13 @@ SELECT
     END                                 AS material_status,
 
     -- -------------------------------------------------------------------------
-    -- TOOTMISE SEOS (kuidas materjali kasutati)
+    -- TOOTMISE SEOS (tootmistöö, kuhu pakk sisendina lisati)
     -- -------------------------------------------------------------------------
-    p.processing_work_id_in             AS processing_work_received,  -- tootmistöö, mis lõi selle pakk (nt lõikus)
-    p.processing_work_id_out            AS processing_work_consumed,  -- tootmistöö, kuhu pakk anti (nt liimimine)
-    p.processing_step_id_made          AS processing_step_made,
-    p.processing_step_id_used          AS processing_step_used,
-    p.product_id_parent                 AS parent_product_id,         -- vanem-pakk (kui splititud)
+    p.processing_work_id_in             AS processing_work_received,  -- processing_work.id, kuhu pakk sisendiks lisati
+    p.processing_step_id_used           AS processing_step_used,
+    pw_in.number                        AS work_in_number,            -- töö kuvamisnumber (nt 549)
+    ev_ws_in.name                       AS work_in_status,            -- Planned/Started/Finished/Standby/Ready
+    pw_in.archived                      AS work_in_archived,
 
     -- -------------------------------------------------------------------------
     -- MÜÜGILEPINGU SEOS (kui materjal on reserveeritud/kasutatud)
@@ -147,14 +133,12 @@ SELECT
     -- KOMMENTAARID (planeerija märkused)
     -- -------------------------------------------------------------------------
     p.comment                           AS product_comment,           -- pakitaseme kommentaar
-    cd_pur.comment                      AS order_line_comment_full,   -- ostutellimuse rea kommentaar
 
     -- -------------------------------------------------------------------------
     -- TEHNILINE AUDIT
     -- -------------------------------------------------------------------------
     p.wr_created                        AS product_created_at,
     p.wr_modified                       AS product_modified_at,
-    p.shipment_id,
     p.invoice_id                        AS purchase_invoice_id,
     p.invoice_row_id                    AS purchase_invoice_row_id
 
@@ -193,9 +177,12 @@ LEFT JOIN dbo.treatment tr
 LEFT JOIN webrock.wr_enum_value ev_cert
     ON p.cert_id = ev_cert.id
 
--- Artikkel
-LEFT JOIN views.article_dyn art
-    ON p.article_id = art.id
+-- Tootmistöö (kuhu pakk sisendina lisati)
+LEFT JOIN dbo.processing_work pw_in
+    ON p.processing_work_id_in = pw_in.id
+
+LEFT JOIN webrock.wr_enum_value ev_ws_in
+    ON pw_in.work_status_id = ev_ws_in.id
 
 -- Müügilepingu seos
 LEFT JOIN dbo.contract c_sal
