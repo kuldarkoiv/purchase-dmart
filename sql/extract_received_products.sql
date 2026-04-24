@@ -154,20 +154,20 @@ SELECT
 
 FROM dbo.product p
 
--- Ostulepingu rida (MIKS see pakk osteti)
-INNER JOIN dbo.contract_delivery cd_pur
+-- Ostulepingu rida (MIKS see pakk osteti) — LEFT JOIN: ka pakid ilma ostulepinguta
+LEFT JOIN dbo.contract_delivery cd_pur
     ON p.purchase_contract_row_id = cd_pur.id
 
 -- Lepingukaup (spetsifikatsioon)
-INNER JOIN dbo.contract_goods cg
+LEFT JOIN dbo.contract_goods cg
     ON cd_pur.contract_goods_id = cg.id
 
 -- Ostuleping
-INNER JOIN dbo.contract c_pur
+LEFT JOIN dbo.contract c_pur
     ON cg.contract_id = c_pur.id
 
 -- Tarnija
-INNER JOIN dbo.account a_sup
+LEFT JOIN dbo.account a_sup
     ON c_pur.account_id_supplier = a_sup.id
 
 -- Saateleht/ostuarve (millal saabuvs)
@@ -221,7 +221,7 @@ LEFT JOIN views.contract_delivery_list cdl_pur
     ON cd_pur.id = cdl_pur.id
 
 WHERE
-    -- Ainult ostetud materjal (mitte ise toodetud)
-    p.purchase_contract_row_id IS NOT NULL
+    -- Ostetud materjal: kas ostulepinguga seotud VÕI saabunud saatelehega (orphan pakid)
+    (p.purchase_contract_row_id IS NOT NULL OR p.purchase_waybill_id IS NOT NULL)
     -- Välista maha kantud (wrote_off) vanad kirjed? - KOMMENTEERI LAHTI KUI SOOVID KA NEID
     -- AND p.wrote_off = 0
