@@ -106,6 +106,8 @@ SELECT
         WHEN p.contract_delivery_id IS NOT NULL OR p.bron = 1           THEN 'reserveeritud'
         WHEN p.contract_id IS NOT NULL                                  THEN 'reserveeritud'
         WHEN p.processing_work_id_in IS NOT NULL                        THEN 'tootmises'
+        WHEN p.purchase_contract_row_id IS NULL
+         AND p.purchase_waybill_id IS NOT NULL                          THEN 'ekspedeeritud'
         ELSE                                                                 'vaba'
     END                                 AS material_status,
 
