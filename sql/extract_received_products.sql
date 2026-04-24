@@ -137,7 +137,7 @@ SELECT
     -- -------------------------------------------------------------------------
     -- KOMMENTAARID (planeerija märkused)
     -- -------------------------------------------------------------------------
-    p.comment                           AS product_comment,           -- pakitaseme kommentaar
+    NULLIF(LTRIM(RTRIM(p.comment)), '')  AS product_comment,           -- pakitaseme kommentaar (tühi string → NULL)
 
     -- -------------------------------------------------------------------------
     -- TEGELIK PIKKUS JA MAHT (product_piece)
