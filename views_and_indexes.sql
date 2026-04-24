@@ -191,7 +191,12 @@ SELECT 'vaba_ladu'  AS segment,
     supplier_name, purchase_contract_number, purchase_contract_archived,
     order_due_date, marking_comments, actual_length_mm,
     packs::NUMERIC AS packs, m3,
-    product_comment
+    product_comment,
+    'https://natural.timbererp.com/v3/Stock/Products?wt_order=number&wt_pagesize=100&wt_f_present=1'
+        || '&wt_f_height_purchase=%22' || ROUND(height)::TEXT || '%22'
+        || '&wt_f_width_purchase=%22'  || ROUND(width)::TEXT  || '%22'
+        || '&wt_f_length='             || actual_length_mm::TEXT
+        || '&'                          AS erp_url
 FROM free_stock
 UNION ALL
 SELECT 'tulemas'    AS segment,
@@ -202,7 +207,8 @@ SELECT 'tulemas'    AS segment,
     NULL::BIGINT     AS actual_length_mm,
     packs::TEXT::NUMERIC AS packs,
     m3,
-    product_comment
+    product_comment,
+    NULL::TEXT       AS erp_url
 FROM pending
 ORDER BY species_name, grade_name, height, width, length, actual_length_mm NULLS LAST, segment;
 
